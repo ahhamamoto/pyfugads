@@ -88,5 +88,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Data for tests
+# Data and code for tests
+test.py
 data/
