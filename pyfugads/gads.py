@@ -19,32 +19,55 @@ class GADS():
         self.mutation_rate = mut_rate
         self.selection_method = selection
 
-        self.run(0)
+        self.intervals = self.dataset.shape[0]
+        self.optimal = np.zeros(self.intervals)
+
+    def run_all(self):
+        """Optimizes every interval in dataset."""
+        for i in range(self.intervals):
+            self.run(i)
+        print(self.optimal)
 
     def run(self, idx):
         """Runs the gads of a single interval."""
-        self.idx = idx
-        self.best_chromosome = np.zeros(self.population_size)
-        self.best_fitness = np.zeros(self.population_size)
+        self.best_chromosome = np.zeros(self.generations)
+        self.best_fitness = np.zeros(self.generations)
+
         self.generate_population()
         self.population_fitness()
 
-        best_idx = np.argmax(self.fitness)
-        self.best_fitness[0] = self.fitness[best_idx]
-        self.best_chromosome[0] = self.population[best_idx]
+        for i in range(1, self.generations):
+            ## ga steps
+            self.selection()
+            self.crossover()
+            self.mutation()
+            self.population = self.new_population
+            self.population_fitness()
 
-        self.selection()
-        print(self.new_population)
-        self.crossover()
-        print(self.new_population)
+            ## store best chromosome created
+            fitness = np.append(self.fitness, [self.best_fitness[i-1]])
+            population = np.append(self.population, [self.best_chromosome[i-1]])
+            best_idx = np.argmax(fitness)
+            self.best_chromosome[i] = population[best_idx]
+            self.best_fitness[i] = fitness[best_idx]
 
-    def generate_population(self):
-        """Generate initial population based on input."""
+        self.optimal[idx] = self.best_chromosome[-1]
+
+    def generate_random_population(self):
+        """Generate initial population randomly based on input."""
         self.inferior_limit = np.min(self.dataset[self.idx])
         self.superior_limit = np.max(self.dataset[self.idx])
         self.population = np.random.uniform(self.inferior_limit,
                                             self.superior_limit,
                                             self.population_size)
+
+    def generate_population(self):
+        """Generate initial population based on input difference."""
+        self.inferior_limit = np.min(self.dataset[self.idx])
+        self.superior_limit = np.max(self.dataset[self.idx])
+        self.population = np.linspace(self.inferior_limit,
+                                      self.superior_limit,
+                                      self.population_size)
 
     def calculate_fitness(self, chromosome):
         """Calculates the fitness of a chromosome."""
@@ -84,6 +107,14 @@ class GADS():
                 self.new_population[i:i+2] = self.mate(self.new_population[i],
                                                        self.new_population[i+1])
 
+    def mutate(self, chromosome):
+        """Mutate a chromosome."""
+        value = np.random.choice([-1, 1]) * self.mutation_rate * chromosome
+        return chromosome + value
 
-gads = GADS([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]],
-            10, 50, 0.5, 0.03, 0.01)
+    def mutation(self):
+        """Performs mutation on new population."""
+        for i, chromosome in enumerate(self.new_population):
+            chance = np.random.ranf()
+            if chance <= self.mutation_probability:
+                self.new_population[i] = self.mutate(chromosome)
