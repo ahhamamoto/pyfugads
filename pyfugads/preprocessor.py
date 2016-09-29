@@ -22,7 +22,6 @@ class Preprocessor():
             splitted = list(f.groupby(pd.TimeGrouper('1Min')))
             timestamps = [name for name, group in splitted]
             bps = [group['bytes'].sum()/60 for name, group in splitted]
-            print('bps')
             pps = [group['packets'].sum()/60 for name, group in splitted]
             sa_en = [self.shannon(group['src_addr'].value_counts())
                      for name, group in splitted]
