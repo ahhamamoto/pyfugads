@@ -25,6 +25,7 @@ class GADS():
     def run_all(self):
         """Optimizes every interval in dataset."""
         for i in range(self.intervals):
+            self.idx = i
             self.run(i)
         print(self.optimal)
 
