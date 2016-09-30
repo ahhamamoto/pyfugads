@@ -32,7 +32,7 @@ class Preprocessor():
             dp_en = [self.shannon(group['dst_port'].value_counts())
                      for name, group in splitted]
 
-            self.extracted = {
+            extracted = {
                 'bps':   pd.Series(bps, index=timestamps),
                 'pps':   pd.Series(pps, index=timestamps),
                 'sa_en': pd.Series(sa_en, index=timestamps),
@@ -40,6 +40,7 @@ class Preprocessor():
                 'sp_en': pd.Series(sp_en, index=timestamps),
                 'dp_en': pd.Series(dp_en, index=timestamps)
             }
+            self.extracted = pd.DataFrame(extracted)
         except:
             print('File not found.')
 
